@@ -1,0 +1,147 @@
+import * as BSON from 'bson';
+
+import { Document } from './Document';
+import { Request } from './Request';
+import { Schema } from './Schema';
+import { Wallet } from './Wallet';
+
+interface CreateDatabasePayload<T> {
+    data: {
+        schema: T;
+    },
+    signature: string;
+}
+
+interface CreateDatabaseResponse {
+    database_name: string;
+}
+
+interface CreateDocsPayload<T> {
+    data: {
+        docs: Document<T> | Document<T>[];
+        database_name: string;
+    },
+    signature: string;
+}
+
+interface CreateDocsResponse {
+    success: boolean;
+    ids: string[] | string;
+}
+
+interface DeleteDocsPayload {
+    data: {
+        ids: string[] | string;
+        database_name: string;
+    }
+    signature: string;
+}
+
+interface DeleteDocsResponse {
+    success: boolean;
+    ids: string[] | string;
+}
+
+interface SearchDocsPayload {
+    data: {
+        database_name: string;
+        matrix: number[][];
+        k: number;
+    },
+    signature: string;
+}
+
+interface SearchDocsResponse<T> {
+    success?: boolean;
+    docs: T[];
+    dists: number[][];
+}
+
+export class AquilaClient {
+
+    private request: Request;
+
+    public constructor(
+        url: string,
+        port: number,
+        private wallet: Wallet
+    ) {
+        this.request = new Request(url, port);        
+    }
+
+    public async connect(): Promise<void> {
+        await this.request.checkConnection();
+    }
+
+    public async createDatabase(schema: Schema): Promise<string> {
+        const schemaData = { schema };
+        const bsonData = BSON.serialize(schemaData); 
+        const signature = this.wallet.signBsonData(bsonData);
+        const data: CreateDatabasePayload<Schema> = {
+            data: schemaData,
+            signature,
+        };
+        const responseData = await this.request.post<CreateDatabaseResponse, CreateDatabasePayload<Schema>>('/db/create', data);
+        return responseData["database_name"];
+    }
+
+    /**
+     * 
+     * @param dbName 
+     * @param docs 
+     */
+    public async createDocuments<T>(dbName: string, docs: Document<T> | Document<T>[]): Promise<string | string[]> {
+        const docData = {docs, database_name: dbName};
+        const bsonData = BSON.serialize(docData);
+        const signature = this.wallet.signBsonData(bsonData);
+        const data: CreateDocsPayload<T> = {
+            data: docData,
+            signature
+        };
+        const responseData = await this.request.post<CreateDocsResponse, CreateDocsPayload<T>>("/db/doc/insert", data);
+        if(responseData["success"]) {
+            return responseData["ids"];
+        }else {
+            throw Error("Faied");
+        }
+    }
+
+    public async deleteDocuments(dbName: string, ids: string[] | string): Promise<string| string[]> {
+        const deleteData = {ids, database_name: dbName}; 
+        const bsonData = BSON.serialize(deleteData);
+        const signature = this.wallet.signBsonData(bsonData);
+        const data = {
+            data:deleteData,
+            signature
+        }
+        const responseData = await this.request.post<DeleteDocsResponse, DeleteDocsPayload>("/db/doc/delete", data);
+        if(responseData["success"]) {
+            return responseData["ids"];
+        }else {
+            throw Error("Faied");
+        }
+    }
+
+    public async searchKDocuments<T>(dbName: string, matrix: number[][], k: number): Promise<SearchDocsResponse<T>> {
+        const searchData = {
+            database_name: dbName,
+            matrix,
+            k,
+        };
+        const bsonData = BSON.serialize(searchData);
+        const signature = this.wallet.signBsonData(bsonData);
+        const data = {
+            data: searchData,
+            signature,
+        };
+        const responseData = await this.request.get<SearchDocsResponse<T>, SearchDocsPayload>('/db/search', data);
+        if(responseData["success"]) {
+            return {
+                docs: responseData["docs"],
+                dists: responseData["dists"]
+            };
+        }else {
+            throw new Error("Something went wrong");
+        }
+    }
+} 
