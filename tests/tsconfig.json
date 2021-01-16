@@ -1,0 +1,15 @@
+{
+    "extends": "../tsconfig.json",
+    "references": [
+        {
+            "name": "aquila-client",
+            "path": ".."
+        },
+    ],
+    "compilerOptions": {
+        "rootDir": "..",
+        "types": ["jest"],
+        "noEmit": true
+    },
+    "include": ["."]
+}
