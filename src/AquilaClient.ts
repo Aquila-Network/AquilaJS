@@ -51,10 +51,13 @@ interface SearchDocsPayload {
     signature: string;
 }
 
-interface SearchDocsResponse<T> {
-    success?: boolean;
+export interface SearchDocsResult<T> {
     docs: T[];
     dists: number[][];
+}
+
+interface SearchDocsResponse<T> extends SearchDocsResult<T> {
+    success?: boolean;
 }
 
 export class AquilaClient {
@@ -122,7 +125,7 @@ export class AquilaClient {
         }
     }
 
-    public async searchKDocuments<T>(dbName: string, matrix: number[][], k: number): Promise<SearchDocsResponse<T>> {
+    public async searchKDocuments<T>(dbName: string, matrix: number[][], k: number): Promise<SearchDocsResult<T>> {
         const searchData = {
             database_name: dbName,
             matrix,
