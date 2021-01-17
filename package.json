@@ -1,5 +1,5 @@
 {
-  "name": "aquila-client",
+  "name": "aquila-js",
   "version": "1.0.0",
   "description": "Aquila Client",
   "main": "dist/index.js",
