@@ -1,150 +1,39 @@
-import * as BSON from 'bson';
-
-import { Document } from './Document';
-import { Request } from './Request';
-import { Schema } from './Schema';
-import { Wallet } from './Wallet';
-
-interface CreateDatabasePayload<T> {
-    data: {
-        schema: T;
-    },
-    signature: string;
-}
-
-interface CreateDatabaseResponse {
-    database_name: string;
-}
-
-interface CreateDocsPayload<T> {
-    data: {
-        docs: Document<T> | Document<T>[];
-        database_name: string;
-    },
-    signature: string;
-}
-
-interface CreateDocsResponse {
-    success: boolean;
-    ids: string[] | string;
-}
-
-interface DeleteDocsPayload {
-    data: {
-        ids: string[] | string;
-        database_name: string;
-    }
-    signature: string;
-}
-
-interface DeleteDocsResponse {
-    success: boolean;
-    ids: string[] | string;
-}
-
-interface SearchDocsPayload {
-    data: {
-        database_name: string;
-        matrix: number[][];
-        k: number;
-    },
-    signature: string;
-}
-
-export interface SearchDocsResult<T> {
-    docs: T[];
-    dists: number[][];
-}
-
-interface SearchDocsResponse<T> extends SearchDocsResult<T> {
-    success?: boolean;
-}
+import { Db } from "./Db";
+import { Hub } from "./Hub";
+import { Wallet } from "./Wallet";
 
 export class AquilaClient {
 
-    private request: Request;
+    private static dbs: { key: string, dbServer: Db }[] = [];
+    private static hubs: { key: string, hubServer: Hub}[] = [];
 
-    public constructor(
-        url: string,
-        port: number,
-        private wallet: Wallet
-    ) {
-        this.request = new Request(url, port);        
-    }
-
-    public async connect(): Promise<void> {
-        await this.request.checkConnection();
-    }
-
-    public async createDatabase(schema: Schema): Promise<string> {
-        const schemaData = { schema };
-        const bsonData = BSON.serialize(schemaData); 
-        const signature = this.wallet.signBsonData(bsonData);
-        const data: CreateDatabasePayload<Schema> = {
-            data: schemaData,
-            signature,
-        };
-        const responseData = await this.request.post<CreateDatabaseResponse, CreateDatabasePayload<Schema>>('/db/create', data);
-        return responseData["database_name"];
-    }
-
-    /**
-     * 
-     * @param dbName 
-     * @param docs 
-     */
-    public async createDocuments<T>(dbName: string, docs: Document<T> | Document<T>[]): Promise<string | string[]> {
-        const docData = {docs, database_name: dbName};
-        const bsonData = BSON.serialize(docData);
-        const signature = this.wallet.signBsonData(bsonData);
-        const data: CreateDocsPayload<T> = {
-            data: docData,
-            signature
-        };
-        const responseData = await this.request.post<CreateDocsResponse, CreateDocsPayload<T>>("/db/doc/insert", data);
-        if(responseData["success"]) {
-            return responseData["ids"];
-        }else {
-            throw Error("Faied");
+    public static async getDbServer(host: string, port: number, wallet: Wallet): Promise<Db> {
+        const db = AquilaClient.dbs.find(item => item.key === `${host}:${port}`);
+        if(db) {
+            return db.dbServer;
         }
+        const dbServer = new Db(host, port, wallet); 
+        await dbServer.connect();
+        const newServer = {
+            key: `${host}:${port}`,
+            dbServer
+        };
+        AquilaClient.dbs.push(newServer);
+        return dbServer;
     }
 
-    public async deleteDocuments(dbName: string, ids: string[] | string): Promise<string| string[]> {
-        const deleteData = {ids, database_name: dbName}; 
-        const bsonData = BSON.serialize(deleteData);
-        const signature = this.wallet.signBsonData(bsonData);
-        const data = {
-            data:deleteData,
-            signature
+    public static async getHubServer(host: string, port: number, wallet: Wallet): Promise<Hub> {
+        const hub = AquilaClient.hubs.find(item => item.key === `${host}:${port}`);
+        if(hub) {
+            return hub.hubServer;
         }
-        const responseData = await this.request.post<DeleteDocsResponse, DeleteDocsPayload>("/db/doc/delete", data);
-        if(responseData["success"]) {
-            return responseData["ids"];
-        }else {
-            throw Error("Faied");
-        }
-    }
-
-    public async searchKDocuments<T>(dbName: string, matrix: number[][], k: number): Promise<SearchDocsResult<T>> {
-        const searchData = {
-            database_name: dbName,
-            matrix,
-            k,
+        const hubServer = new Hub(host, port, wallet); 
+        await hubServer.connect();
+        const newServer = {
+            key: `${host}:${port}`,
+            hubServer
         };
-        const bsonData = BSON.serialize(searchData);
-        const signature = this.wallet.signBsonData(bsonData);
-        const data = {
-            data: searchData,
-            signature,
-        };
-        const responseData = await this.request.get<SearchDocsResponse<T>, SearchDocsPayload>('/db/search', data);
-        if(responseData["success"]) {
-            return {
-                docs: responseData["docs"],
-                dists: responseData["dists"]
-            };
-        }else {
-            throw new Error("Something went wrong");
-        }
+        AquilaClient.hubs.push(newServer);
+        return hubServer;
     }
-} 
+}
