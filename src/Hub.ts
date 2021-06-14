@@ -12,7 +12,7 @@ interface CreateDatabasePayload<T> {
 }
 
 interface CreateDatabaseResponse {
-    database_name: string;
+    databaseName: string;
 }
 
 interface CompressDocumentPayload<T> {
@@ -50,7 +50,7 @@ export class Hub {
             signature,
         };
         const responseData = await this.request.post<CreateDatabaseResponse, CreateDatabasePayload<Schema>>('/prepare', data);
-        return responseData["database_name"];
+        return responseData["databaseName"];
     }
 
     public async compressDocument<T>(dbName: string, data: T): Promise< number[] | number[][]> {
