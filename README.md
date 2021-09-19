@@ -22,6 +22,16 @@
   <br/>
 </div>
 
+Here is a bird's eye view of where Aquila Client Libraries fit in the entire ecosystem:
+<div align="center">
+  <img
+    src="https://user-images.githubusercontent.com/19545678/133918436-63c39f8a-aa6c-4d7c-939a-20e35cc8b2c2.png"
+    alt="Aquila client libraries"
+    height="400"
+  />
+ <br/>
+</div>
+
 ## Connect to Database and Hub
 ```js
 import { AquilaClient, Wallet, Db, Hub } from 'aquila-js';
