@@ -1,5 +1,26 @@
-# AquilaJS
-Javascript client library for Aquila Network 
+<div align="center">
+  <a href="https://aquila.network">
+    <img
+      src="https://user-images.githubusercontent.com/19545678/133918727-5a37c6be-676f-427b-8c86-dd50f58d1287.png"
+      alt="Aquila Network Logo"
+      height="64"
+    />
+  </a>
+  <br />
+  <p>
+    <h3>
+      <b>
+        Aquila JS
+      </b>
+    </h3>
+  </p>
+  <p>
+    <b>
+      Javascript client to access Aquila Network Neural Search Engine
+    </b>
+  </p>
+  <br/>
+</div>
 
 ## Connect to Database and Hub
 ```js
