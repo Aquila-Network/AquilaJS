@@ -57,13 +57,13 @@ AquilaClient.getHubServer(hubUrl, hubPort, hubWallet).then(hub => {
 
 ```ts
 const schema: Schema = {
-		description: "description of db",
-		unique: "r8and0mse---",
-		encoder: "ftxt:https://encoder-url",
-		codelen: 500,
-		metadata: {
-				"key": "value",
-		}
+	description: "description of db",
+	unique: "r8and0mse---",
+	encoder: "ftxt:https://encoder-url",
+	codelen: 500,
+	metadata: {
+			"key": "value",
+	}
 };
 db.createDatabase(schema).then(dbName => {
 	// done
@@ -79,21 +79,21 @@ hub.createDatabase(schema).then(dbNameHub => {
 const dbName = 'db-name';
 const data = ['Amazon', 'Google'];
 const generatedCode = hub.compressDocument(dbName, data).then((generatedCode: as number[][]) => {
-	const docs: Document<DocMetaData>[] = [
-		{
-				metadata: {
-						name: "name test",
-						age: 20
-				},
-				code: generatedCode[0],
-		},{
-				metadata: {
-						name: "name2 test",
-						age: 32
-				},
-				code: generatedCode[1],
-		}
-	];
+const docs: Document<DocMetaData>[] = [
+	{
+		metadata: {
+				name: "name test",
+				age: 20
+		},
+		code: generatedCode[0],
+	},{
+		metadata: {
+				name: "name2 test",
+				age: 32
+		},
+		code: generatedCode[1],
+	}
+];
 	return db.createDocuments(dbName, docs)
 }).then(docs => {
 	// succes	
