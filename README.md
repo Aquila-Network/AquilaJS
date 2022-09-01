@@ -33,7 +33,7 @@ Here is a bird's eye view of where Aquila Client Libraries fit in the entire eco
 </div>
 
 ## Connect to Database and Hub
-```js
+```ts
 import { AquilaClient, Wallet, Db, Hub } from 'aquila-js';
 
 const wallet = new Wallet('DB_PRIVATE_KEY_PATH-HERE');
@@ -55,7 +55,7 @@ AquilaClient.getHubServer(hubUrl, hubPort, hubWallet).then(hub => {
 
 ## Create Database
 
-```js
+```ts
 const schema: Schema = {
 		description: "description of db",
 		unique: "r8and0mse---",
@@ -75,7 +75,7 @@ hub.createDatabase(schema).then(dbNameHub => {
 
 ## Create Document
 
-```js
+```ts
 const dbName = 'db-name';
 const data = ['Amazon', 'Google'];
 const generatedCode = hub.compressDocument(dbName, data).then((generatedCode: as number[][]) => {
@@ -103,7 +103,7 @@ const generatedCode = hub.compressDocument(dbName, data).then((generatedCode: as
 
 ## Search Documents
 
-```js
+```ts
 const searchData = [[0.06443286, 0.106639  , 0.81865615]];
 const resultCount = 10;
 db.searchKDocuments<DocMetaData>(dbName[0], searchData, resultCount).then(result => {
@@ -113,7 +113,7 @@ db.searchKDocuments<DocMetaData>(dbName[0], searchData, resultCount).then(result
 
 ## Delete Document
 
-```js
+```ts
 db.deleteDocuments(dbName[0], deleteIds).then(result => {
 // success
 });
