@@ -1,6 +1,6 @@
 {
   "name": "aquila-js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Aquila Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
